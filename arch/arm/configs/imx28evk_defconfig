@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.3
-# Mon Dec  6 17:17:47 2010
+# Wed Dec 14 10:31:34 2011
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -1001,7 +1001,7 @@ CONFIG_MAX_RAW_DEVS=8192
 CONFIG_I2C=y
 CONFIG_I2C_BOARDINFO=y
 CONFIG_I2C_COMPAT=y
-# CONFIG_I2C_CHARDEV is not set
+CONFIG_I2C_CHARDEV=y
 CONFIG_I2C_HELPER_AUTO=y
 
 #
