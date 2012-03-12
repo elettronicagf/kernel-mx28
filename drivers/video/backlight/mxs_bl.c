@@ -358,7 +358,7 @@ static int mxsbl_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static struct platform_driver mxsbl_driver = {
+static struct platform_driver mxsbl_driver __refdata = {
 	.probe		= mxsbl_probe,
 	.remove		= __devexit_p(mxsbl_remove),
 	.suspend	= mxsbl_suspend,

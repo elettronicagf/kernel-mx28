@@ -1330,7 +1330,7 @@ static int fsl_otg_remove(struct platform_device *pdev)
 	return 0;
 }
 
-struct platform_driver fsl_otg_driver = {
+struct platform_driver fsl_otg_driver __refdata = {
 	.probe = fsl_otg_probe,
 	.remove = fsl_otg_remove,
 	.driver = {

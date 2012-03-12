@@ -1291,7 +1291,7 @@ static int mxs_mmc_resume(struct platform_device *pdev)
 #define mxs_mmc_resume	NULL
 #endif /* CONFIG_PM */
 
-static struct platform_driver mxs_mmc_driver = {
+static struct platform_driver mxs_mmc_driver __refdata = {
 	.probe = mxs_mmc_probe,
 	.remove = __exit_p(mxs_mmc_remove),
 	.suspend = mxs_mmc_suspend,

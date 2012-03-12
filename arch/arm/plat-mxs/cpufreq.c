@@ -498,7 +498,7 @@ static int mxs_cpu_exit(struct cpufreq_policy *policy)
 	return 0;
 }
 
-static struct cpufreq_driver mxs_driver = {
+static struct cpufreq_driver mxs_driver __refdata = {
 	.flags		= CPUFREQ_STICKY,
 	.verify		= mxs_verify_speed,
 	.target		= mxs_target,

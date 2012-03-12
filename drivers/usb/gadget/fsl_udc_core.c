@@ -2458,7 +2458,7 @@ static int fsl_udc_resume(struct platform_device *pdev)
 	Register entry point for the peripheral controller driver
 --------------------------------------------------------------------------*/
 
-static struct platform_driver udc_driver = {
+static struct platform_driver udc_driver __refdata = {
 	.remove  = __exit_p(fsl_udc_remove),
 	/* these suspend and resume are not usb suspend and resume */
 	.suspend = fsl_udc_suspend,

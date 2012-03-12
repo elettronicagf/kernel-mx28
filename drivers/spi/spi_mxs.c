@@ -720,7 +720,7 @@ static int mxs_spi_resume(struct platform_device *pdev)
 #define mxs_spi_resume  NULL
 #endif
 
-static struct platform_driver mxs_spi_driver = {
+static struct platform_driver mxs_spi_driver __refdata = {
 	.probe = mxs_spi_probe,
 	.remove = __devexit_p(mxs_spi_remove),
 	.driver = {
