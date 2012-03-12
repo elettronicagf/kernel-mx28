@@ -38,7 +38,7 @@
 #endif
 
 #ifndef MXS_ARCH_NR_GPIOS
-#define MXS_ARCH_NR_GPIOS	160
+#define MXS_ARCH_NR_GPIOS	192
 #endif
 
 #ifndef MXS_EXTEND_NR_GPIOS

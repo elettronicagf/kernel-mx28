@@ -37,16 +37,38 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/physmap.h>
+#include <linux/i2c/sx150x.h>
+#include <linux/gpio.h>
 
 #include "device.h"
 #include "mx28evk.h"
-
+static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_1;
+static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_2;
 static struct i2c_board_info __initdata mxs_i2c_device[] = {
-	{ I2C_BOARD_INFO("sgtl5000-i2c", 0xa), .flags = I2C_M_TEN }
+	{
+			I2C_BOARD_INFO("sgtl5000-i2c", 0xa),
+			.flags = I2C_M_TEN,
+	},
+	{
+			I2C_BOARD_INFO("sx1509q", 0x3E),
+			.platform_data = &sx1509_gpio_expander_data_1,
+	},
+	{
+			I2C_BOARD_INFO("sx1509q", 0x3F),
+			.platform_data = &sx1509_gpio_expander_data_2,
+	}
 };
+static void __init init_gpio_expander(void)
+{
+	sx1509_gpio_expander_data_1.irq_summary = -1;
+	sx1509_gpio_expander_data_1.gpio_base = 160;
+	sx1509_gpio_expander_data_2.irq_summary = -1;
+	sx1509_gpio_expander_data_2.gpio_base = 176;
+}
 
 static void __init i2c_device_init(void)
 {
+	init_gpio_expander();
 	i2c_register_board_info(0, mxs_i2c_device, ARRAY_SIZE(mxs_i2c_device));
 }
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
@@ -127,7 +149,7 @@ static void __init mx28evk_device_init(void)
 {
 	/* Add mx28evk special code */
 	i2c_device_init();
-	spi_device_init();
+//	spi_device_init();
 	mx28evk_init_leds();
 }
 

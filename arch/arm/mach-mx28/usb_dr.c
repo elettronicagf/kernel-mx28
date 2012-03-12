@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+#define DEBUG
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/clk.h>
@@ -29,7 +29,7 @@
 #include <mach/arc_otg.h>
 #include "usb.h"
 #include "mx28_pins.h"
-#define USB_POWER_ENABLE MXS_PIN_TO_GPIO(PINID_AUART2_TX)
+#define USB_POWER_ENABLE 176
 
 extern int clk_get_usecount(struct clk *clk);
 static struct clk *usb_clk;
@@ -52,6 +52,7 @@ void fsl_phy_usb_utmi_uninit(struct fsl_xcvr_ops *this)
 void fsl_phy_set_power(struct fsl_xcvr_ops *this,
 			struct fsl_usb2_platform_data *pdata, int on)
 {
+	gpio_request(USB_POWER_ENABLE,"OTG_5V_ENABLE");
 	/* USB_POWER_ENABLE_PIN have request at pin init*/
 	if (pdata->phy_regs != USBPHY1_PHYS_ADDR) {
 		pr_debug("%s: on is %d\n", __func__, on);
