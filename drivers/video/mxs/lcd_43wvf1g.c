@@ -30,14 +30,14 @@
 #include <mach/regs-pwm.h>
 #include <mach/system.h>
 
-#define DOTCLK_H_ACTIVE  480
+#define DOTCLK_H_ACTIVE  800
 #define DOTCLK_H_PULSE_WIDTH 10
 #define DOTCLK_HF_PORCH  164
 #define DOTCLK_HB_PORCH  89
 #define DOTCLK_H_WAIT_CNT  (DOTCLK_H_PULSE_WIDTH + DOTCLK_HB_PORCH)
 #define DOTCLK_H_PERIOD (DOTCLK_H_WAIT_CNT + DOTCLK_HF_PORCH + DOTCLK_H_ACTIVE)
 
-#define DOTCLK_V_ACTIVE  272
+#define DOTCLK_V_ACTIVE  480
 #define DOTCLK_V_PULSE_WIDTH  10
 #define DOTCLK_VF_PORCH  10
 #define DOTCLK_VB_PORCH  23
@@ -147,8 +147,8 @@ static int blank_panel(int blank)
 
 static struct mxs_platform_fb_entry fb_entry = {
 	.name = "43wvf1g",
-	.x_res = 272,
-	.y_res = 480,
+	.x_res = 480,
+	.y_res = 800,
 	.bpp = 32,
 	.cycle_time_ns = 30,
 	.lcd_type = MXS_LCD_PANEL_DOTCLK,
