@@ -816,7 +816,6 @@ static struct fec_platform_data fec_pdata0 = {
 
 static struct fec_platform_data fec_pdata1 = {
 	.phy = PHY_INTERFACE_MODE_RMII,
-	.init = mx28evk_enet_gpio_init,
 };
 
 static void __init mx28_init_fec(void)
@@ -1605,7 +1604,7 @@ int __init mx28_device_init(void)
 	mx28_init_dcp();
 	mx28_init_battery();
 	mx28_init_persistent();
-//	mx28_init_otp();
+	mx28_init_otp();
 	return 0;
 }
 

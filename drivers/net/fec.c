@@ -1013,6 +1013,7 @@ static int
 fec_enet_open(struct net_device *dev)
 {
 	struct fec_enet_private *fep = netdev_priv(dev);
+	struct fec_platform_data *pdata;
 	int ret;
 
 	/* I should reset the ring buffers here, but I don't yet know
@@ -1022,6 +1023,11 @@ fec_enet_open(struct net_device *dev)
 	ret = fec_enet_alloc_buffers(dev);
 	if (ret)
 		return ret;
+
+	/* Force reset */
+	pdata = fep->pdev->dev.platform_data;
+	if (pdata && pdata->init)
+		ret = pdata->init();
 
 	/* Probe and connect to PHY when open the interface */
 	ret = fec_enet_mii_probe(dev);

@@ -1094,21 +1094,19 @@ static struct pin_desc mx28evk_spi_pins[] = {
 #define ENET_PWR		178
 int mx28evk_enet_gpio_init(void)
 {
-//	/* pwr */
-//	gpio_request(ENET_PWR, "ENET_PWR");
-//	gpio_direction_output(ENET_PWR, 0);
-//
-//	/* reset phy */
-//	gpio_request(PHY_RESET_GPIO, "PHY_RESET");
-//	gpio_direction_output(PHY_RESET_GPIO, 0);
-//
-//	/*
-//	 * Before timer bug fix(set wrong match value of timer),
-//	 * mdelay(10) delay 50ms actually.
-//	 * So change delay to 50ms after timer issue fix.
-//	 */
-//	mdelay(50);
-//	gpio_direction_output(PHY_RESET_GPIO, 1);
+	/* pwr */
+	gpio_request(ENET_PWR, "ENET_PWR");
+	gpio_direction_output(ENET_PWR, 0);
+	gpio_request(PHY_RESET_GPIO, "PHY_RESET");
+	gpio_direction_output(PHY_RESET_GPIO, 0);
+
+
+	gpio_set_value(PHY_RESET_GPIO,0);
+	gpio_set_value(ENET_PWR,0);
+	mdelay(25);
+	gpio_set_value(PHY_RESET_GPIO,0);
+	mdelay(50);
+	gpio_set_value(PHY_RESET_GPIO, 1);
 
 	return 0;
 }
