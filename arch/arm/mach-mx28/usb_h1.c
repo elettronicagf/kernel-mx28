@@ -28,11 +28,12 @@
 #include <asm/mach/arch.h>
 #include <mach/irqs.h>
 #include "usb.h"
+#include <linux/gpio.h>
 
 extern int clk_get_usecount(struct clk *clk);
 static struct clk *usb_clk;
 static struct clk *usb_phy_clk;
-
+#define GPIO_USB_HOST_POWER_ENABLE 177
 static void usb_host_phy_resume(struct fsl_usb2_platform_data *plat)
 {
 	fsl_platform_set_usb_phy_dis(plat, 0);
@@ -72,6 +73,15 @@ static int fsl_usb_host_init_ext(struct platform_device *pdev)
 	clk_put(usb_phy_clk);
 
 	usbh1_internal_phy_clock_gate(true);
+	/* switch on 5V regulator */
+	if (gpio_request(GPIO_USB_HOST_POWER_ENABLE, "USB_HOST_POWER_ENABLE")){
+		printk(KERN_ERR "vbus5v_gpio_autorequest failed!\n");
+	}
+	else
+		gpio_direction_output(GPIO_USB_HOST_POWER_ENABLE,1);
+
+
+
 	return fsl_usb_host_init(pdev);
 }
 

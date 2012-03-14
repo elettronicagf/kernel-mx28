@@ -31,7 +31,6 @@
 #include <mach/regulator.h>
 #include <mach/regs-power.h>
 
-#define USB_POWER_ENABLE  176
 #define MX28EVK_VBUS5v 5
 
 static int get_voltage(struct mxs_regulator *sreg)
@@ -315,22 +314,17 @@ static struct regulator_init_data vddio_init = {
 
 static int vbus5v_enable(struct mxs_regulator *sreg)
 {
-	printk("vbus5v_enable\n");
-	gpio_set_value(USB_POWER_ENABLE, 1);
 	return 0;
 }
 
 static int vbus5v_disable(struct mxs_regulator *sreg)
 {
-	printk("vbus5v_disable\n");
-	gpio_set_value(USB_POWER_ENABLE, 0);
 	return 0;
 }
 
 static int vbus5v_is_enabled(struct mxs_regulator *sreg)
 {
-	printk("vbus5v_is_enabled\n");
-	return gpio_get_value(USB_POWER_ENABLE);
+	return 0;
 }
 
 
@@ -579,7 +573,6 @@ static int __init regulators_init(void)
 	mxs_platform_add_regulator("charger", 1);
 	mxs_platform_add_regulator("power-test", 1);
 	mxs_platform_add_regulator("cpufreq", 1);
-	gpio_direction_output(USB_POWER_ENABLE, 0);
 	return 0;
 }
 postcore_initcall(regulators_init);
