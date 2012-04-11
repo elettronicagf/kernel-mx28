@@ -42,6 +42,20 @@
 
 #include "device.h"
 #include "mx28evk.h"
+
+/* EEPROM */
+#include <linux/i2c/at24.h>
+#define EEPROM_ON_MODULE_I2C_ADDR 0x50
+/* EEPROM  */
+
+/* EEprom on SOM336 */
+static struct at24_platform_data at24c64 = {
+     .byte_len       = SZ_64K / 8,
+     .flags			 = AT24_FLAG_ADDR16,
+     .page_size      = 32,
+};
+
+
 static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_1;
 static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_2;
 static struct i2c_board_info __initdata mxs_i2c_device[] = {
@@ -56,7 +70,11 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	{
 			I2C_BOARD_INFO("sx1509q", 0x3F),
 			.platform_data = &sx1509_gpio_expander_data_2,
-	}
+	},
+	{	/* Eeprom on module */
+	        I2C_BOARD_INFO("24c64", EEPROM_ON_MODULE_I2C_ADDR),
+	       .platform_data  = &at24c64,
+	},
 };
 static void __init init_gpio_expander(void)
 {
@@ -70,6 +88,7 @@ static void __init i2c_device_init(void)
 {
 	init_gpio_expander();
 	i2c_register_board_info(0, mxs_i2c_device, ARRAY_SIZE(mxs_i2c_device));
+
 }
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 static struct flash_platform_data mx28_spi_flash_data = {
