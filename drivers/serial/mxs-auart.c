@@ -48,6 +48,11 @@
 #define MXS_AUART_MAJOR	242
 #define MXS_AUART_RX_THRESHOLD 16
 
+
+#ifdef CONFIG_EGF_485
+#include <linux/gpio.h>
+#define DIR485_GPIO	5
+#endif
 static struct uart_driver auart_driver;
 
 struct mxs_auart_port {
@@ -69,6 +74,10 @@ struct mxs_auart_port {
 	struct list_head free;
 	struct mxs_dma_desc *tx;
 	struct tasklet_struct rx_task;
+#ifdef CONFIG_EGF_485
+	int	emulate_485;
+	int	dir_485_gpio; /* HI transmit - LOW receive */
+#endif
 };
 
 static void mxs_auart_stop_tx(struct uart_port *u);
@@ -83,7 +92,12 @@ static inline struct mxs_auart_port *to_auart_port(struct uart_port *u)
 static inline void mxs_auart_tx_chars(struct mxs_auart_port *s)
 {
 	struct circ_buf *xmit = &s->port.state->xmit;
-
+#ifdef CONFIG_EGF_485
+	if (s->emulate_485){
+		//printk("mxs_auart_tx_chars\n");
+		gpio_set_value(s->dir_485_gpio,1);
+	}
+#endif
 	if (s->flags & MXS_AUART_PORT_DMA_MODE) {
 		int i = 0, size;
 		char *buffer = s->tx->buffer;
@@ -143,6 +157,18 @@ static inline void mxs_auart_tx_chars(struct mxs_auart_port *s)
 
 	if (uart_tx_stopped(&s->port))
 		mxs_auart_stop_tx(&s->port);
+
+#ifdef CONFIG_EGF_485
+	if (s->emulate_485){
+		unsigned int status;
+		do {
+			status = __raw_readl(s->port.membase + HW_UARTAPP_STAT);
+		} while (status & BM_UARTAPP_STAT_BUSY);
+
+		gpio_set_value(s->dir_485_gpio,0);
+	}
+#endif
+
 }
 
 static inline unsigned int
@@ -724,7 +750,6 @@ static void mxs_auart_shutdown(struct uart_port *u)
 static unsigned int mxs_auart_tx_empty(struct uart_port *u)
 {
 	struct mxs_auart_port *s = to_auart_port(u);
-
 	if (s->flags & MXS_AUART_PORT_DMA_MODE)
 		return mxs_dma_desc_pending(s->tx) ? 0 : TIOCSER_TEMT;
 
@@ -747,7 +772,9 @@ static void mxs_auart_start_tx(struct uart_port *u)
 
 static void mxs_auart_stop_tx(struct uart_port *u)
 {
+
 	__raw_writel(BM_UARTAPP_CTRL2_TXE, u->membase + HW_UARTAPP_CTRL2_CLR);
+
 }
 
 static void mxs_auart_stop_rx(struct uart_port *u)
@@ -1036,6 +1063,15 @@ static int __devinit mxs_auart_probe(struct platform_device *pdev)
 	memcpy(&auart_port[pdev->id], s, sizeof(struct mxs_auart_port));
 #endif
 
+#ifdef CONFIG_EGF_485
+	if(pdev->id == 3){
+		printk(KERN_INFO "Configuring 485 for ttySP3");
+		s->emulate_485 = 1;
+		s->dir_485_gpio = DIR485_GPIO;
+		gpio_request(DIR485_GPIO,"DIR 485");
+		gpio_direction_output(DIR485_GPIO, 0);
+	}
+#endif
 	ret = uart_add_one_port(&auart_driver, &s->port);
 	if (ret)
 		goto out_free_clk;
@@ -1044,6 +1080,8 @@ static int __devinit mxs_auart_probe(struct platform_device *pdev)
 	printk(KERN_INFO "Found APPUART %d.%d.%d\n",
 	       (version >> 24) & 0xFF,
 	       (version >> 16) & 0xFF, version & 0xFFFF);
+
+
 	return 0;
 
 out_free_clk:

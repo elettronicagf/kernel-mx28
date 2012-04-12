@@ -390,6 +390,12 @@ config SERIAL_MXS_AUART_CONSOLE
          your boot loader (lilo or loadlin) about how to pass options to the
          kernel at boot time.)
 
+config EGF_485
+       bool "Support for RS485 port on SOM361 on application serial port UART3"
+       depends on SERIAL_MXS_AUART=y
+       select SERIAL_CORE_CONSOLE
+       ---help---
+          Activate RS485 transceiver on UART3 for SOM361
 
 config SERIAL_MXS_DUART_CONSOLE
         bool "Support for console on i.MXS debug serial port"

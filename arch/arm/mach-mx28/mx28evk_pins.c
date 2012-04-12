@@ -63,13 +63,13 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 #ifdef CONFIG_MXS_AUART3_DEVICE_ENABLE
 	{
 	 .name  = "AUART3.RX",
-	 .id    = PINID_AUART3_RX,
-	 .fun   = PIN_FUN1,
+	 .id    = PINID_SSP2_MISO,
+	 .fun   = PIN_FUN2,
 	 },
 	{
 	 .name  = "AUART3.TX",
-	 .id    = PINID_AUART3_TX,
-	 .fun   = PIN_FUN1,
+	 .id    = PINID_SSP2_SS0,
+	 .fun   = PIN_FUN2,
 	 },
 	{
 	 .name	= "AUART3.TXE",
