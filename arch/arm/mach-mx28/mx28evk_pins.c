@@ -86,15 +86,15 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 /* AUART2 */
 	{
 	 .name = "AUART2.RX",
-	 .id = PINID_AUART2_RX,
+	 .id = PINID_SSP2_SCK,
 	 .fun = PIN_FUN2,
 	 },
 	{
 	 .name = "AUART2.TX",
-	 .id = PINID_AUART2_TX,
+	 .id = PINID_SSP2_MOSI,
 	 .fun = PIN_FUN2,
 	 },
-	{
+/*	{
 	 .name = "AUART2.RTS",
 	 .id = PINID_AUART2_RTS,
 	 .fun = PIN_FUN1,
@@ -103,7 +103,7 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 .name = "AUART2.CTS",
 	 .id = PINID_AUART2_CTS,
 	 .fun = PIN_FUN1,
-	 },
+	 }, */
 
 #if defined(CONFIG_USB_OTG)
 	 {
