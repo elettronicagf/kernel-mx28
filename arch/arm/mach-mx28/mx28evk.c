@@ -108,11 +108,19 @@ static struct spi_board_info spi_board_info[] __initdata = {
 		.platform_data = &mx28_spi_flash_data,
 	},
 #endif
+	{
+			/* the modalias must be the same as spi device driver name */
+			.modalias = "spidev", /* Name of spi_driver for this device */
+			.max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
+			.bus_num = 1, /* Framework bus number */
+			.chip_select = 0, /* Framework chip select. */
+		},
 };
 
 static void spi_device_init(void)
 {
 	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
+	printk(KERN_INFO "\nRegistered %d SPI: %d",ARRAY_SIZE(spi_board_info),spi_board_info[0].bus_num);
 }
 
 static void __init fixup_board(struct machine_desc *desc, struct tag *tags,
@@ -168,7 +176,7 @@ static void __init mx28evk_device_init(void)
 {
 	/* Add mx28evk special code */
 	i2c_device_init();
-//	spi_device_init();
+	spi_device_init();
 	mx28evk_init_leds();
 }
 

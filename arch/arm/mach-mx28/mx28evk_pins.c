@@ -457,7 +457,7 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 .drive 	= 1,
 	 .pull 		= 1,
 	 },
-	{
+/*	{
 	 .name	= "SSP0_DATA4",
 	 .id	= PINID_SSP0_DATA4,
 	 .fun	= PIN_FUN1,
@@ -496,7 +496,7 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 .pullup	= 1,
 	 .drive 	= 1,
 	 .pull 		= 1,
-	 },
+	 },*/
 	{
 	 .name	= "SSP0_CMD",
 	 .id	= PINID_SSP0_CMD,
