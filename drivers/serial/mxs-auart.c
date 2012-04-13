@@ -93,7 +93,7 @@ static inline void mxs_auart_tx_chars(struct mxs_auart_port *s)
 {
 	struct circ_buf *xmit = &s->port.state->xmit;
 #ifdef CONFIG_EGF_485
-	if (s->emulate_485){
+	if (s->emulate_485 && !uart_circ_empty(xmit)){
 		//printk("mxs_auart_tx_chars\n");
 		gpio_set_value(s->dir_485_gpio,1);
 	}
