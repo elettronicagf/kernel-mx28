@@ -219,6 +219,11 @@ static struct resource auart4_resource[] = {
 	 },
 	{
 	 .flags = IORESOURCE_DMA,
+	 .start = MXS_DMA_CHANNEL_AHB_APBX_UART4_RX,
+	 .end = MXS_DMA_CHANNEL_AHB_APBX_UART4_RX,
+	 },
+	{
+	 .flags = IORESOURCE_DMA,
 	 .start = MXS_DMA_CHANNEL_AHB_APBX_UART4_TX,
 	 .end = MXS_DMA_CHANNEL_AHB_APBX_UART4_TX,
 	 },
