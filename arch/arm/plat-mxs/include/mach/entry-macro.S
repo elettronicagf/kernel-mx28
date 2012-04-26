@@ -24,9 +24,13 @@
 	.macro	get_irqnr_and_base, irqnr, irqstat, base, tmp
 	ldr \base, =g_icoll_base
 	ldr \base, [\base]
-	ldr \irqnr, [\base, #0x70]
-	cmp \irqnr, #0x7F
+	ldr r4, =0x1120
+	add r3, \base, r4
+	ldr r3, [r3]
+	and r4, r3, #0x30000
+	cmp r4, #0x00
 	moveqs \irqnr, #0
+	ldr \irqnr, [\base, #0x70]
 	.endm
 
 	.macro  get_irqnr_preamble, base, tmp
