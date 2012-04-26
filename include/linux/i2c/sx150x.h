@@ -19,7 +19,7 @@
  */
 #ifndef __LINUX_I2C_SX150X_H
 #define __LINUX_I2C_SX150X_H
-
+#include <linux/input/matrix_keypad.h>
 /**
  * struct sx150x_platform_data - config data for SX150x driver
  * @gpio_base: The index number of the first GPIO assigned to this
@@ -79,4 +79,11 @@ struct sx150x_platform_data {
 	bool     reset_during_probe;
 };
 
+struct sxegfkp_platform_data {
+	const struct matrix_keymap_data *keymap_data;
+	unsigned rows;
+	unsigned cols;
+	int irq;
+	bool rep;
+};
 #endif /* __LINUX_I2C_SX150X_H */

@@ -55,8 +55,37 @@ static struct at24_platform_data at24c64 = {
      .page_size      = 32,
 };
 
+static uint32_t board_keymap[] = {
+	KEY(0, 0, KEY_F1),
+	KEY(0, 1, KEY_UP),
+	KEY(0, 2, KEY_ENTER),
 
-static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_1;
+	KEY(1, 0, KEY_F2),
+	KEY(1, 1, KEY_DOWN),
+	KEY(1, 3, KEY_VOLUMEUP),
+
+	KEY(2, 0, KEY_F3),
+	KEY(2, 1, KEY_LEFT),
+	KEY(2, 3, KEY_VOLUMEDOWN),
+
+	KEY(3, 0, KEY_F4),
+	KEY(3, 1, KEY_RIGHT),
+	KEY(3, 3, KEY_POWER),
+};
+
+static struct  matrix_keymap_data __initdata board_map_data = {
+	.keymap			= board_keymap,
+	.keymap_size		= ARRAY_SIZE(board_keymap),
+};
+#define KEYPAD_INTERRUPT_GPIO	6
+static struct  sxegfkp_platform_data __initdata omap3egf_kp_data = {
+	.keymap_data	= &board_map_data,
+	.rows		= 4,
+	.cols		= 4,
+	.rep		= 1,
+};
+
+//static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_1;
 static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_2;
 static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	{
@@ -64,8 +93,8 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 			.flags = I2C_M_TEN,
 	},
 	{
-			I2C_BOARD_INFO("sx1509q", 0x3E),
-			.platform_data = &sx1509_gpio_expander_data_1,
+			I2C_BOARD_INFO("sxegfkp", 0x3E),
+			.platform_data = &omap3egf_kp_data,
 	},
 	{
 			I2C_BOARD_INFO("sx1509q", 0x3F),
@@ -78,15 +107,20 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 };
 static void __init init_gpio_expander(void)
 {
-	sx1509_gpio_expander_data_1.irq_summary = -1;
-	sx1509_gpio_expander_data_1.gpio_base = 160;
+//	sx1509_gpio_expander_data_1.irq_summary = -1;
+//	sx1509_gpio_expander_data_1.gpio_base = 160;
 	sx1509_gpio_expander_data_2.irq_summary = -1;
 	sx1509_gpio_expander_data_2.gpio_base = 176;
+}
+static void __init init_keypad(void)
+{
+	omap3egf_kp_data.irq = gpio_to_irq(KEYPAD_INTERRUPT_GPIO);
 }
 
 static void __init i2c_device_init(void)
 {
 	init_gpio_expander();
+	init_keypad();
 	i2c_register_board_info(0, mxs_i2c_device, ARRAY_SIZE(mxs_i2c_device));
 
 }

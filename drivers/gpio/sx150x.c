@@ -24,6 +24,7 @@
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/i2c/sx150x.h>
+#include <linux/input.h>
 
 struct sx150x_device_data {
 	u8 reg_pullup;
