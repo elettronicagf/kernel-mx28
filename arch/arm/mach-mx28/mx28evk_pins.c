@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+#define DEBUG
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/platform_device.h>
@@ -825,36 +825,6 @@ static struct pin_desc mx28evk_ssp1_pins[] = {
 	 .pull 		= 1,
 	 },
 	{
-	 .name	= "SSP1_DATA4",
-	 .id	= PINID_GPMI_D04,
-	 .fun	= PIN_FUN2,
-	 .strength	= PAD_8MA,
-	 .voltage	= PAD_3_3V,
-	 .pullup	= 1,
-	 .drive 	= 1,
-	 .pull 		= 1,
-	 },
-	{
-	 .name	= "SSP1_DATA6",
-	 .id	= PINID_GPMI_D06,
-	 .fun	= PIN_FUN2,
-	 .strength	= PAD_8MA,
-	 .voltage	= PAD_3_3V,
-	 .pullup	= 1,
-	 .drive 	= 1,
-	 .pull 		= 1,
-	 },
-	{
-	 .name	= "SSP1_DATA7",
-	 .id	= PINID_GPMI_D07,
-	 .fun	= PIN_FUN2,
-	 .strength	= PAD_8MA,
-	 .voltage	= PAD_3_3V,
-	 .pullup	= 1,
-	 .drive 	= 1,
-	 .pull 		= 1,
-	 },
-	{
 	 .name	= "SSP1_CMD",
 	 .id	= PINID_GPMI_RDY1,
 	 .fun	= PIN_FUN2,
@@ -1088,6 +1058,18 @@ static struct pin_desc mx28evk_spi_pins[] = {
 	 },
 };
 #endif
+#if defined(CONFIG_KEYBOARD_MX28_EGFBOARD) || defined(KEYBOARD_MX28_EGFBOARD_MODULE)
+static struct pin_desc egf_keypad_pins[] = {
+	{
+		.name     = "KEYPAD INT",
+		.id       = PINID_GPMI_D06,
+		.fun      = PIN_GPIO,
+		.voltage  = PAD_1_8V,
+		.pullup   = 0,
+		.drive    = 0
+	},
+};
+#endif
 
 #if defined(CONFIG_FEC) || defined(CONFIG_FEC_MODULE) || defined(CONFIG_FEC_L2SWITCH)
 #define PHY_RESET_GPIO	179
@@ -1196,6 +1178,11 @@ void __init mx28evk_pins_init(void)
 		mx28evk_init_pin_group(mx28evk_gpmi_pins,
 						ARRAY_SIZE(mx28evk_gpmi_pins));
 	}
+
+#if defined(CONFIG_KEYBOARD_MX28_EGFBOARD) || defined(KEYBOARD_MX28_EGFBOARD_MODULE)
+	pr_info("Initializing KEYPAD pins\n");
+	mx28evk_init_pin_group(egf_keypad_pins, ARRAY_SIZE(egf_keypad_pins));
+#endif
 
 #if defined(CONFIG_SPI_MXS) || defined(CONFIG_SPI_MXS_MODULE)
 	mx28evk_init_pin_group(mx28evk_spi_pins,
