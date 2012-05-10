@@ -524,7 +524,7 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 .strength	= PAD_12MA,
 	 .voltage	= PAD_3_3V,
 	 .pullup	= 0,
-	 .drive 	= 2,
+	 .drive 	= 1,
 	 .pull 		= 0,
 	 },
 #endif
@@ -549,6 +549,26 @@ static struct pin_desc mx28evk_fixed_pins[] = {
 	 .drive         = 1,
 	 .pull          = 1,
 	 },
+#else
+	{
+	 .name = "GPIO_3-4",
+	 .id = PINID_AUART1_RX,
+	 .fun           = PIN_GPIO,
+	 .strength      = PAD_8MA,
+	 .voltage       = PAD_3_3V,
+	 .pullup   = 0,
+	 .drive    = 0,
+	 },
+	{
+	 .name = "IMX-SD3-nCD",
+	 .id = PINID_AUART1_TX,
+	 .fun           = PIN_FUN2,
+	 .strength	= PAD_8MA,
+	 .voltage	= PAD_3_3V,
+	 .pullup	= 0,
+	 .drive 	= 1,
+	 .pull 		= 0,
+	},
 #endif
 #if defined(CONFIG_SND_MXS_SOC_DAI) || defined(CONFIG_SND_MXS_SOC_DAI_MODULE)
 	/* Configurations of SAIF0 port pins */
@@ -851,7 +871,7 @@ static struct pin_desc mx28evk_ssp1_pins[] = {
 	 .strength	= PAD_12MA,
 	 .voltage	= PAD_3_3V,
 	 .pullup	= 0,
-	 .drive 	= 2,
+	 .drive 	= 1,
 	 .pull 		= 0,
 	 },
 };
@@ -1195,6 +1215,8 @@ void __init mx28evk_pins_init(void)
 						ARRAY_SIZE(mx28evk_eth_pins));
 #endif
 
-
+#if !defined(CONFIG_LEDS_MXS) && !defined(CONFIG_LEDS_MXS_MODULE)
+	gpio_free(MXS_PIN_TO_GPIO(PINID_AUART1_RX));
+#endif
 
 }
