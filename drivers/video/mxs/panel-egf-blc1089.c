@@ -25,7 +25,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/platform_device.h>
 #include <linux/gpio.h>
-
+#include <linux/i2c/sx150x.h>
 #include <mach/device.h>
 #include <mach/lcdif.h>
 #include <mach/regs-pwm.h>
@@ -167,14 +167,11 @@ static struct mxs_platform_fb_entry fb_entry = {
 
 static int init_bl(struct mxs_platform_bl_data *data)
 {
-	gpio_request(GPIO_ENABLE_LCD_BACKLIGHT,"Enable Backlight");
-	gpio_direction_output(GPIO_ENABLE_LCD_BACKLIGHT,0);
 	return 0;
 }
 
 static void free_bl(struct mxs_platform_bl_data *data)
 {
-	gpio_free(GPIO_ENABLE_LCD_BACKLIGHT);
 }
 
 
@@ -182,7 +179,7 @@ static int set_bl_intensity(struct mxs_platform_bl_data *data,
 			    struct backlight_device *bd, int suspended)
 {
 	int intensity = bd->props.brightness;
-	gpio_set_value(GPIO_ENABLE_LCD_BACKLIGHT,intensity);
+	sx150x_set_bl_intesity(intensity);
 	return 0;
 }
 

@@ -13,6 +13,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
+ *
+ * PWM configuration for EGF Board Copyright (C) 2012 Elettronica GF S.r.l.
+ * Code written by:
+ * Andrea Collamati <andrea.collamati@elettronicagf.it>
+ *
  */
 #include <linux/gpio.h>
 #include <linux/i2c.h>
@@ -25,6 +30,47 @@
 #include <linux/workqueue.h>
 #include <linux/i2c/sx150x.h>
 #include <linux/input.h>
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+/*
+ * IN 0377 EVB with MX28 SOM Module the following pin are configured
+ * as PWM
+ *
+ * IO-4		PWM2
+ * IO-14	PWM0
+ * IO-15	PWM1
+ */
+#define PWM_EXPANDER_ADDRESS	0x3F
+#define REG_MISC_PWM_7812HZ		0x10  // PWM frequency 	2MHz/2^8 = 7812.5 Hz
+#define PWM0_OFFSET				14
+#define PWM1_OFFSET				15
+#define PWM2_OFFSET				4
+
+
+#define PWM2_MASK_A				0x10		// Bank A IO-4
+#define PWM1_2_MASK_B			0xC0		// Bank B IO-14/IO-15
+#define MISC_PWM_FREQ_MASK		0x70
+#define MISC_PWM_FREQ_SHIFT		0x04
+
+#define REG_INPUT_DISABLE_B		0x00
+#define REG_INPUT_DISABLE_A		0x01
+#define REG_PULLUP_B			0x06
+#define REG_PULLUP_A			0x07
+#define REG_OPENDRAIN_B			0x0A
+#define REG_OPENDRAIN_A			0x0B
+#define REG_DIR_B				0x0E
+#define REG_DIR_A				0x0F
+#define REG_DATA_B				0x10
+#define REG_DATA_A				0x11
+#define REG_CLOCK				0x1E
+#define REG_MISC				0x1F
+#define REG_LED_DRIVER_EN_B		0x20
+#define REG_LED_DRIVER_EN_A		0x21
+
+#define REG_ION4_PWM2			0x36
+#define REG_ION14_PWM0			0x60
+#define REG_ION15_PWM1			0x65
+
+#endif
 
 struct sx150x_device_data {
 	u8 reg_pullup;
@@ -94,6 +140,13 @@ static const struct i2c_device_id sx150x_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, sx150x_id);
 
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+/*
+ * we keep the reference for backlight api
+ */
+static struct i2c_client* egf_sx1509_pwm_client;
+#endif
+
 static s32 sx150x_i2c_write(struct i2c_client *client, u8 reg, u8 val)
 {
 	s32 err = i2c_smbus_write_byte_data(client, reg, val);
@@ -122,6 +175,11 @@ static inline bool offset_is_oscio(struct sx150x_chip *chip, unsigned offset)
 {
 	return (chip->dev_cfg->ngpios == offset);
 }
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+static inline int is_a_reserved_pwm_pin(int offset){
+	return (offset == PWM0_OFFSET || offset == PWM1_OFFSET || offset == PWM2_OFFSET);
+}
+#endif
 
 /*
  * These utility functions solve the common problem of locating and setting
@@ -158,6 +216,10 @@ static s32 sx150x_write_cfg(struct sx150x_chip *chip,
 	u8  data;
 	u8  shift;
 	s32 err;
+	if(is_a_reserved_pwm_pin(offset)){
+		printk(KERN_INFO "sx150x_write_cfg IGNORE CONFIG add=%x offset=%d width=%d reg=%x  val=%x\n",chip->client->addr,offset,width,reg,val);
+		return 0;
+	}
 
 	sx150x_find_cfg(offset, width, &reg, &mask, &shift);
 	err = sx150x_i2c_read(chip->client, reg, &data);
@@ -476,22 +538,177 @@ static int sx150x_reset(struct sx150x_chip *chip)
 	return err;
 }
 
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+static int sx150x_init_egf_pwm(struct sx150x_chip *chip,
+			struct sx150x_platform_data *pdata)
+{
+	int err = 0;
+	u8 val;
+	err = sx150x_i2c_write(chip->client,
+			chip->dev_cfg->reg_misc,
+			0x01 | REG_MISC_PWM_7812HZ);
+	if (err < 0)
+		return err;
+
+	/* DISABLE INPUT BUFFER */
+	err = sx150x_i2c_read(chip->client,REG_INPUT_DISABLE_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val |= PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_INPUT_DISABLE_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_INPUT_DISABLE_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val |= PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_INPUT_DISABLE_B,
+			val);
+	if (err < 0)
+		return err;
+
+	/* DISABLE PULLUP */
+	err = sx150x_i2c_read(chip->client,REG_PULLUP_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_PULLUP_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_PULLUP_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_PULLUP_B,
+			val);
+	if (err < 0)
+		return err;
+
+	/* CONFIGURE DIRECTION AS OUTPUT */
+	err = sx150x_i2c_read(chip->client,REG_DIR_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_DIR_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_DIR_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_DIR_B,
+			val);
+	if (err < 0)
+		return err;
+
+	/* DISABLE OPENDRAIN */
+	err = sx150x_i2c_read(chip->client,REG_OPENDRAIN_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_OPENDRAIN_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_OPENDRAIN_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_OPENDRAIN_B,
+			val);
+	if (err < 0)
+		return err;
+
+	/* ENABLE INNER OSCILLATOR */
+	err = sx150x_i2c_write(chip->client,REG_CLOCK,0x40);
+	if (err < 0)
+		return err;
+
+	/* ENABLE LED DRIVER */
+	err = sx150x_i2c_read(chip->client,REG_LED_DRIVER_EN_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val |= PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_LED_DRIVER_EN_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_LED_DRIVER_EN_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val |= PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_LED_DRIVER_EN_B,
+			val);
+	if (err < 0)
+		return err;
+
+
+	/* RESET REGDATA */
+	err = sx150x_i2c_read(chip->client,REG_DATA_A,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM2_MASK_A;
+	err = sx150x_i2c_write(chip->client,REG_DATA_A,
+			val);
+	if (err < 0)
+		return err;
+
+	err = sx150x_i2c_read(chip->client,REG_DATA_B,
+			&val);
+	if (err < 0)
+		return err;
+
+	val &= ~PWM1_2_MASK_B;
+	err = sx150x_i2c_write(chip->client,REG_DATA_B,
+			val);
+	return err;
+}
+#endif
 static int sx150x_init_hw(struct sx150x_chip *chip,
 			struct sx150x_platform_data *pdata)
 {
 	int err = 0;
-
 	if (pdata->reset_during_probe) {
 		err = sx150x_reset(chip);
 		if (err < 0)
 			return err;
 	}
-
 	err = sx150x_i2c_write(chip->client,
 			chip->dev_cfg->reg_misc,
 			0x01);
 	if (err < 0)
 		return err;
+
 
 	err = sx150x_init_io(chip, chip->dev_cfg->reg_pullup,
 			pdata->io_pullup_ena);
@@ -515,6 +732,7 @@ static int sx150x_init_hw(struct sx150x_chip *chip,
 
 	if (pdata->oscio_is_gpo)
 		sx150x_set_oscio(chip, 0);
+
 
 	return err;
 }
@@ -568,6 +786,140 @@ static void sx150x_remove_irq_chip(struct sx150x_chip *chip)
 		set_irq_chip(irq, NULL);
 	}
 }
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+
+static ssize_t sx150x_dutycycleX_show(struct device *dev,
+				     struct device_attribute *attr, char *buf, u8 reg)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 val;
+	return sprintf(buf, "%d\n", 255 - sx150x_i2c_read(client, reg ,&val));
+}
+
+static ssize_t sx150x_dutycycleX_store(struct device *dev,
+				     struct device_attribute *attr,
+				     const char *buf, size_t count, u8 reg)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	unsigned long val;
+	int error;
+
+	error = strict_strtoul(buf, 10, &val);
+	if (error)
+		return error;
+	val = 255 - val;
+	if (val< 0 || val > 255)
+		return -EINVAL;
+	else
+		sx150x_i2c_write(client, reg ,(u8)val);
+
+	return count;
+}
+
+
+static ssize_t sx150x_dutycycle0_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	return sx150x_dutycycleX_show(dev,attr,buf,REG_ION14_PWM0);
+}
+
+static ssize_t sx150x_dutycycle0_store(struct device *dev,
+				     struct device_attribute *attr,
+				     const char *buf, size_t count)
+{
+	return sx150x_dutycycleX_store(dev,attr,buf,count,REG_ION14_PWM0);
+}
+
+
+static ssize_t sx150x_dutycycle1_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	return sx150x_dutycycleX_show(dev,attr,buf,REG_ION15_PWM1);
+}
+
+static ssize_t sx150x_dutycycle1_store(struct device *dev,
+				     struct device_attribute *attr,
+				     const char *buf, size_t count)
+{
+	return sx150x_dutycycleX_store(dev,attr,buf,count,REG_ION15_PWM1);
+}
+
+
+
+static ssize_t sx150x_dutycycle2_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	return sx150x_dutycycleX_show(dev,attr,buf,REG_ION4_PWM2);
+}
+
+static ssize_t sx150x_dutycycle2_store(struct device *dev,
+				     struct device_attribute *attr,
+				     const char *buf, size_t count)
+{
+	return sx150x_dutycycleX_store(dev,attr,buf,count,REG_ION4_PWM2);
+}
+
+static ssize_t sx150x_freq_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 val;
+	sx150x_i2c_read(client, REG_MISC ,&val);
+	val = (val & MISC_PWM_FREQ_MASK) >> MISC_PWM_FREQ_SHIFT;
+	return sprintf(buf, "%d\n", 6 - val);
+}
+
+static ssize_t sx150x_freq_store(struct device *dev,
+				     struct device_attribute *attr,
+				     const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	unsigned long val;
+	int error;
+
+	error = strict_strtoul(buf, 10, &val);
+	if (error)
+		return error;
+	val = 6 - val;
+	if (val< 0 || val > 6)
+		return -EINVAL;
+	else {
+		u8 reg_val;
+		sx150x_i2c_read(client, REG_MISC ,&reg_val);
+		reg_val &= ~MISC_PWM_FREQ_MASK;
+		reg_val |= ((u8)val)<< MISC_PWM_FREQ_SHIFT;
+		sx150x_i2c_write(client, REG_MISC ,(u8)reg_val);
+	}
+	return count;
+}
+
+static DEVICE_ATTR(dutycycle0, 0664, sx150x_dutycycle0_show, sx150x_dutycycle0_store);
+static DEVICE_ATTR(dutycycle1, 0664, sx150x_dutycycle1_show, sx150x_dutycycle1_store);
+static DEVICE_ATTR(dutycycle2, 0664, sx150x_dutycycle2_show, sx150x_dutycycle2_store);
+static DEVICE_ATTR(freq, 0664, sx150x_freq_show, sx150x_freq_store);
+
+static struct attribute *sx150x_attributes[] = {
+	&dev_attr_dutycycle0.attr,
+	&dev_attr_dutycycle1.attr,
+	&dev_attr_dutycycle2.attr,
+	&dev_attr_freq.attr,
+	NULL
+};
+
+static const struct attribute_group sx150x_attr_group = {
+	.attrs = sx150x_attributes,
+};
+
+void sx150x_set_bl_intesity(int val){
+
+	if(val<0)
+		val=0;
+	if(val>255)
+		val=255;
+	sx150x_i2c_write(egf_sx1509_pwm_client, REG_ION15_PWM1 ,(u8)val);
+}
+EXPORT_SYMBOL(sx150x_set_bl_intesity);
+#endif
 
 static int __devinit sx150x_probe(struct i2c_client *client,
 				const struct i2c_device_id *id)
@@ -608,6 +960,21 @@ static int __devinit sx150x_probe(struct i2c_client *client,
 
 	i2c_set_clientdata(client, chip);
 
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+	if(chip->client->addr == PWM_EXPANDER_ADDRESS){
+		printk(KERN_INFO "Initializing SX1509 at %x for EGF BOARD in PWM configuration\n",PWM_EXPANDER_ADDRESS);
+		egf_sx1509_pwm_client = chip->client;
+		sx150x_init_egf_pwm(chip, pdata);
+		if (rc < 0)
+			goto probe_fail_post_gpiochip_add;
+
+		rc = sysfs_create_group(&client->dev.kobj, &sx150x_attr_group);
+		if (rc)
+			goto probe_fail_post_gpiochip_add;
+	}
+#endif
+
+
 	return 0;
 probe_fail_post_gpiochip_add:
 	WARN_ON(gpiochip_remove(&chip->gpio_chip) < 0);
@@ -615,6 +982,8 @@ probe_fail_pre_gpiochip_add:
 	kfree(chip);
 	return rc;
 }
+
+
 
 static int __devexit sx150x_remove(struct i2c_client *client)
 {
@@ -628,7 +997,11 @@ static int __devexit sx150x_remove(struct i2c_client *client)
 
 	if (chip->irq_summary >= 0)
 		sx150x_remove_irq_chip(chip);
-
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+	if(chip->client->addr == PWM_EXPANDER_ADDRESS){
+		sysfs_remove_group(&client->dev.kobj, &sx150x_attr_group);
+	}
+#endif
 	kfree(chip);
 
 	return 0;

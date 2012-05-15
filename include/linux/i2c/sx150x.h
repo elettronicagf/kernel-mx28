@@ -86,4 +86,8 @@ struct sxegfkp_platform_data {
 	int irq;
 	bool rep;
 };
+#define CONFIG_SX150X_PWM_EGFBOARD
+#ifdef CONFIG_SX150X_PWM_EGFBOARD
+void sx150x_set_bl_intesity(int val);
+#endif
 #endif /* __LINUX_I2C_SX150X_H */

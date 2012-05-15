@@ -1,5 +1,5 @@
 /*
- * twl4030_keypad.c - driver for 8x8 keypad controller in sxegfkp chips
+ * sxegfkp.c - driver for 8x8 keypad controller in sxegfkp chips
  *
  * Copyright (C) 2012 Elettronica GF S.r.l.
  * Code reused of modules
