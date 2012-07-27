@@ -31,7 +31,7 @@
 #include <linux/fec.h>
 #include <linux/gpmi-nfc.h>
 #include <linux/fsl_devices.h>
-
+#include <linux/can/platform/flexcan.h>
 #include <asm/mach/map.h>
 
 #include <mach/hardware.h>
@@ -1105,7 +1105,7 @@ static void __init mx28_init_ts(void)
 #endif
 
 #if defined(CONFIG_CAN_FLEXCAN) || defined(CONFIG_CAN_FLEXCAN_MODULE)
-static void flexcan_xcvr_enable(int id, int en)
+static void flexcan_xcvr_enable(int en)
 {
 	static int pwdn;
 	if (en) {
@@ -1117,6 +1117,8 @@ static void flexcan_xcvr_enable(int id, int en)
 	}
 }
 
+#if 0
+// OLD flexcan drvier
 struct flexcan_platform_data flexcan_data[] = {
 	{
 	.core_reg = NULL,
@@ -1152,6 +1154,16 @@ struct flexcan_platform_data flexcan_data[] = {
 	.std_msg = 1,
 	},
 };
+#endif
+
+struct flexcan_platform_data flexcan_data[] = {
+	{
+	.transceiver_switch = flexcan_xcvr_enable
+	},
+	{
+	.transceiver_switch = flexcan_xcvr_enable
+	},
+};
 
 static struct resource flexcan0_resources[] = {
 	{
@@ -1177,7 +1189,7 @@ static struct resource flexcan1_resources[] = {
 static inline void mx28_init_flexcan(void)
 {
 	struct platform_device *pdev;
-	pdev = mxs_get_device("FlexCAN", 0);
+	pdev = mxs_get_device("imx28-flexcan", 0);
 	if (pdev == NULL || IS_ERR(pdev))
 		return;
 	pdev->resource = flexcan0_resources;
@@ -1185,7 +1197,7 @@ static inline void mx28_init_flexcan(void)
 	pdev->dev.platform_data = &flexcan_data[0];
 	mxs_add_device(pdev, 2);
 
-	pdev = mxs_get_device("FlexCAN", 1);
+	pdev = mxs_get_device("imx28-flexcan", 1);
 	if (pdev == NULL || IS_ERR(pdev))
 		return;
 	pdev->resource = flexcan1_resources;

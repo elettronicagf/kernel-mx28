@@ -1711,13 +1711,13 @@ static struct clk_lookup onchip_clocks[] = {
 	 .clk = &hsadc_clk,
 	 },
 	{
-	 .con_id = "can_clk",
-	 .dev_id = "FlexCAN.0",
+//	 .con_id = "can_clk",
+	 .dev_id = "imx28-flexcan.0",
 	 .clk = &flexcan_clk[0],
 	 },
 	{
-	 .con_id = "can_clk",
-	 .dev_id = "FlexCAN.1",
+//	 .con_id = "can_clk",
+	 .dev_id = "imx28-flexcan.1",
 	 .clk = &flexcan_clk[1],
 	 },
 	{

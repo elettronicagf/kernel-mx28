@@ -443,6 +443,8 @@ struct mxc_mlb_platform_data {
 	char *mlb_clk;
 };
 
+#if 0
+// OLD flexcan driver
 struct flexcan_platform_data {
 	char *core_reg;
 	char *io_reg;
@@ -477,6 +479,7 @@ struct flexcan_platform_data {
 	unsigned int ext_msg:1;
 	unsigned int std_msg:1;
 };
+#endif
 
 struct mxc_srtc_platform_data {
 	u32 srtc_sec_mode_addr;

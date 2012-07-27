@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.3
-# Fri May 11 11:54:00 2012
+# Thu Jul 26 16:31:49 2012
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -495,9 +495,17 @@ CONFIG_CAN_RAW=y
 # CAN Device Drivers
 #
 # CONFIG_CAN_VCAN is not set
-# CONFIG_CAN_DEV is not set
+CONFIG_CAN_DEV=y
+CONFIG_CAN_CALC_BITTIMING=y
+# CONFIG_CAN_MCP251X is not set
+# CONFIG_CAN_SJA1000 is not set
+
+#
+# CAN USB interfaces
+#
+# CONFIG_CAN_EMS_USB is not set
+CONFIG_CAN_FLEXCAN=y
 # CONFIG_CAN_DEBUG_DEVICES is not set
-CONFIG_CAN_FLEXCAN=m
 # CONFIG_IRDA is not set
 # CONFIG_BT is not set
 # CONFIG_AF_RXRPC is not set
