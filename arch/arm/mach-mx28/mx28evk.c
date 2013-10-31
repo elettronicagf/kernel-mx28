@@ -100,10 +100,12 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 			I2C_BOARD_INFO("sx1509q", 0x3F),
 			.platform_data = &sx1509_gpio_expander_data_2,
 	},
+#ifndef CONFIG_FSL_UTP)
 	{	/* Eeprom on module */
 	        I2C_BOARD_INFO("24c64", EEPROM_ON_MODULE_I2C_ADDR),
 	       .platform_data  = &at24c64,
 	},
+#endif
 };
 static void __init init_gpio_expander(void)
 {
