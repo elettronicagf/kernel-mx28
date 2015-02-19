@@ -46,6 +46,11 @@
 /* EEPROM */
 #include <linux/i2c/at24.h>
 #define EEPROM_ON_MODULE_I2C_ADDR 0x50
+
+#define GPIO_DEBUG_LED_RED		160
+#define GPIO_DEBUG_LED_YELLOW	161
+#define GPIO_DEBUG_LED_BLUE		162
+
 /* EEPROM  */
 
 /* EEprom on SOM336 */
@@ -53,6 +58,39 @@ static struct at24_platform_data at24c64 = {
      .byte_len       = SZ_64K / 8,
      .flags			 = AT24_FLAG_ADDR16,
      .page_size      = 32,
+};
+static struct gpio_led gpio_leds[] = {
+		{
+			 .name = "DEBUG-LED-BLUE",
+			 .default_trigger = "heartbeat",
+			 .active_low = 0,
+			 .gpio = GPIO_DEBUG_LED_BLUE,
+		},
+		{
+			 .name = "DEBUG-LED-YELLOW",
+			 .default_trigger = "none",
+			 .active_low = 0,
+			 .gpio = GPIO_DEBUG_LED_YELLOW,
+		},
+		{
+			 .name = "DEBUG-LED-RED",
+			 .default_trigger = "none",
+			 .active_low = 0,
+			 .gpio = GPIO_DEBUG_LED_RED,
+		},
+};
+
+static struct gpio_led_platform_data gpio_led_info = {
+		.leds = gpio_leds,
+		.num_leds = ARRAY_SIZE(gpio_leds),
+};
+
+static struct platform_device leds_gpio = {
+	.name = "leds-gpio",
+	.id = -1,
+	.dev = {
+			.platform_data = &gpio_led_info,
+	},
 };
 
 static uint32_t board_keymap[] = {
@@ -238,6 +276,7 @@ static void __init mx28evk_init_machine(void)
 	mx28evk_pins_init();
 	mx28_device_init();
 	mx28evk_device_init();
+	platform_device_register(&leds_gpio);
 }
 
 MACHINE_START(MX28EVK, "Freescale MX28EVK board")
