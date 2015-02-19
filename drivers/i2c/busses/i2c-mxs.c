@@ -500,7 +500,7 @@ static int mxs_i2c_probe(struct platform_device *pdev)
 	}
 
 	/* reset I2C module */
-	mxs_reset_block((void __iomem *)mxs_i2c->regbase, 1);
+	mxs_reset_block((void __iomem *)mxs_i2c->regbase, 0);
 	platform_set_drvdata(pdev, mxs_i2c);
 
 	if (mxs_i2c->flags & MXS_I2C_PIOQUEUE_MODE)
