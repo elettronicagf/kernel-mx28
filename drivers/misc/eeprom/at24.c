@@ -161,6 +161,9 @@ static ssize_t at24_eeprom_read(struct at24_data *at24, char *buf,
 	unsigned long timeout, read_time;
 	int status, i;
 
+#ifdef CONFIG_EEPROM_AT24_SECOND_HALF
+	offset = offset + (at24->chip.byte_len);
+#endif
 	memset(msg, 0, sizeof(msg));
 
 	/*
@@ -327,6 +330,9 @@ static ssize_t at24_eeprom_write(struct at24_data *at24, const char *buf,
 	unsigned long timeout, write_time;
 	unsigned next_page;
 
+#ifdef CONFIG_EEPROM_AT24_SECOND_HALF
+	offset = offset + (at24->chip.byte_len);
+#endif
 	/* Get corresponding I2C address and adjust offset */
 	client = at24_translate_offset(at24, &offset);
 
@@ -469,6 +475,9 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 	if (client->dev.platform_data) {
 		chip = *(struct at24_platform_data *)client->dev.platform_data;
+#ifdef CONFIG_EEPROM_AT24_SECOND_HALF
+		chip.byte_len = chip.byte_len / 2;
+#endif
 	} else {
 		if (!id->driver_data) {
 			err = -ENODEV;
@@ -476,6 +485,9 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		}
 		magic = id->driver_data;
 		chip.byte_len = BIT(magic & AT24_BITMASK(AT24_SIZE_BYTELEN));
+#ifdef CONFIG_EEPROM_AT24_SECOND_HALF
+		chip.byte_len = chip.byte_len / 2;
+#endif
 		magic >>= AT24_SIZE_BYTELEN;
 		chip.flags = magic & AT24_BITMASK(AT24_SIZE_FLAGS);
 		/*
