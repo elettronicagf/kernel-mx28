@@ -47,7 +47,6 @@
 
 #define GPIO_ENABLE_LCD_BACKLIGHT	191
 
-static struct mxs_platform_bl_data bl_data;
 static struct clk *lcd_clk;
 
 static int init_panel(struct device *dev, dma_addr_t phys, int memsize,
@@ -161,34 +160,6 @@ static struct mxs_platform_fb_entry fb_entry = {
 	.run_panel = mxs_lcdif_run,
 	.stop_panel = mxs_lcdif_stop,
 	.pan_display = mxs_lcdif_pan_display,
-	.bl_data = &bl_data,
-};
-
-
-static int init_bl(struct mxs_platform_bl_data *data)
-{
-	return 0;
-}
-
-static void free_bl(struct mxs_platform_bl_data *data)
-{
-}
-
-
-static int set_bl_intensity(struct mxs_platform_bl_data *data,
-			    struct backlight_device *bd, int suspended)
-{
-	int intensity = bd->props.brightness;
-	sx150x_set_bl_intesity(intensity);
-	return 0;
-}
-
-static struct mxs_platform_bl_data bl_data = {
-	.bl_max_intensity = 1,
-	.bl_default_intensity = 1,
-	.init_bl = init_bl,
-	.free_bl = free_bl,
-	.set_bl_intensity = set_bl_intensity,
 };
 
 static int __init register_devices(void)
