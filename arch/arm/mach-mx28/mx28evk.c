@@ -85,8 +85,8 @@ static struct  sxegfkp_platform_data __initdata omap3egf_kp_data = {
 	.rep		= 1,
 };
 
-//static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_1;
-static struct sx150x_platform_data __initdata sx1509_gpio_expander_data_2;
+static struct sx150x_platform_data __initdata sx1509_gpio_expander_onmodule_data;
+static struct sx150x_platform_data __initdata sx1509_gpio_expander_onboard_data;
 static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	{
 			I2C_BOARD_INFO("sgtl5000-i2c", 0xa),
@@ -98,8 +98,12 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	},
 	{
 			I2C_BOARD_INFO("sx1509q", 0x3F),
-			.platform_data = &sx1509_gpio_expander_data_2,
+			.platform_data = &sx1509_gpio_expander_onmodule_data,
 	},
+	/*{
+			I2C_BOARD_INFO("sx1509q", 0x70),
+			.platform_data = &sx1509_gpio_expander_onboard_data,
+	},*/
 #ifndef CONFIG_FSL_UTP)
 	{	/* Eeprom on module */
 	        I2C_BOARD_INFO("24c64", EEPROM_ON_MODULE_I2C_ADDR),
@@ -109,10 +113,10 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 };
 static void __init init_gpio_expander(void)
 {
-//	sx1509_gpio_expander_data_1.irq_summary = -1;
-//	sx1509_gpio_expander_data_1.gpio_base = 160;
-	sx1509_gpio_expander_data_2.irq_summary = -1;
-	sx1509_gpio_expander_data_2.gpio_base = 176;
+	sx1509_gpio_expander_onmodule_data.irq_summary = -1;
+	sx1509_gpio_expander_onmodule_data.gpio_base = 176;
+	sx1509_gpio_expander_onboard_data.irq_summary = -1;
+	sx1509_gpio_expander_onboard_data.gpio_base = 160;
 }
 static void __init init_keypad(void)
 {
