@@ -21,7 +21,7 @@
 #ifndef LINUX_ADS1015_H
 #define LINUX_ADS1015_H
 
-#define ADS1015_CHANNELS 4
+#define ADS1015_CHANNELS 8
 
 struct ads1015_channel_data {
 	bool enabled;

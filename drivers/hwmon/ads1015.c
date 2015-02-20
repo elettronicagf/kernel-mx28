@@ -49,7 +49,7 @@ static const unsigned int data_rate_table[8] = {
 		128, 250, 490, 920, 1600, 2400, 3300, 3300 };
 
 #define ADS1015_DEFAULT_CHANNELS 0xff
-#define ADS1015_DEFAULT_PGA 2
+#define ADS1015_DEFAULT_PGA 0
 #define ADS1015_DEFAULT_DATA_RATE 4
 
 struct ads1015_data {
