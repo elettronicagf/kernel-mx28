@@ -614,7 +614,7 @@ static struct mxs_mmc_platform_data mmc1_data = {
 	.get_wp		= mxs_mmc_get_wp_ssp1,
 	.cmd_pullup	= mxs_mmc_cmd_pullup_ssp1,
 	.setclock	= mxs_mmc_setclock_ssp1,
-	.caps 		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA
+	.caps 		= MMC_CAP_4_BIT_DATA
 				| MMC_CAP_DATA_DDR,
 	.min_clk	= 400000,
 	.max_clk	= 48000000,
