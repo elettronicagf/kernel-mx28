@@ -45,7 +45,8 @@
 
 /* EEPROM */
 #include <linux/i2c/at24.h>
-#define EEPROM_ON_MODULE_I2C_ADDR 0x50
+#define EEPROM_ON_MODULE_I2C_ADDR 	0x50
+#define EEPROM_ON_BOARD_I2C_ADDR	0x54
 
 #define GPIO_DEBUG_LED_RED		160
 #define GPIO_DEBUG_LED_YELLOW	161
@@ -138,6 +139,9 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	{
 			I2C_BOARD_INFO("sx1509q", 0x3F),
 			.platform_data = &sx1509_gpio_expander_onmodule_data,
+	},
+	{
+			I2C_BOARD_INFO("24c128", EEPROM_ON_BOARD_I2C_ADDR),
 	},
 	/*{
 			I2C_BOARD_INFO("sx1509q", 0x70),
