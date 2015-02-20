@@ -143,6 +143,9 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 			.platform_data = &sx1509_gpio_expander_onboard_data,
 	},*/
 	{
+			I2C_BOARD_INFO("ads1015", 0x48),
+	},
+	{
 			I2C_BOARD_INFO("tmp102", 0x49),
 	},
 #ifndef CONFIG_FSL_UTP)
