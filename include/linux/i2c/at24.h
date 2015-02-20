@@ -24,7 +24,7 @@ struct at24_platform_data {
 #define AT24_FLAG_READONLY	0x40	/* sysfs-entry will be read-only */
 #define AT24_FLAG_IRUGO		0x20	/* sysfs-entry will be world-readable */
 #define AT24_FLAG_TAKE8ADDR	0x10	/* take always 8 addresses (24c00) */
-
+	u8		second_half_only;
 	void		(*setup)(struct memory_accessor *, void *context);
 	void		*context;
 };

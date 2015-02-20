@@ -58,6 +58,7 @@ static struct at24_platform_data at24c64 = {
      .byte_len       = SZ_64K / 8,
      .flags			 = AT24_FLAG_ADDR16,
      .page_size      = 32,
+	 .second_half_only = 1,
 };
 static struct gpio_led gpio_leds[] = {
 		{
