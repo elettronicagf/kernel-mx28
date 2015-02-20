@@ -143,10 +143,10 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	{
 			I2C_BOARD_INFO("24c128", EEPROM_ON_BOARD_I2C_ADDR),
 	},
-	/*{
+	{
 			I2C_BOARD_INFO("sx1509q", 0x70),
 			.platform_data = &sx1509_gpio_expander_onboard_data,
-	},*/
+	},
 	{
 			I2C_BOARD_INFO("ads1015", 0x48),
 	},
