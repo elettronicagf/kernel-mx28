@@ -61,6 +61,15 @@ static struct at24_platform_data at24c64 = {
      .page_size      = 32,
 	 .second_half_only = 1,
 };
+
+/* EEprom on board */
+static struct at24_platform_data at24c128 = {
+     .byte_len       = SZ_128K / 8,
+     .flags			 = AT24_FLAG_ADDR16,
+     .page_size      = 64,
+     .second_half_only = 0,
+};
+
 static struct gpio_led gpio_leds[] = {
 		{
 			 .name = "DEBUG-LED-BLUE",
@@ -142,6 +151,7 @@ static struct i2c_board_info __initdata mxs_i2c_device[] = {
 	},
 	{
 			I2C_BOARD_INFO("24c128", EEPROM_ON_BOARD_I2C_ADDR),
+			.platform_data = &at24c128,
 	},
 	{
 			I2C_BOARD_INFO("sx1509q", 0x70),
